@@ -193,6 +193,11 @@ def plot_point_collection(ax, geoms, colors_or_values,
     """
     x = [p.x for p in geoms]
     y = [p.y for p in geoms]
+
+    # matplotlib (especially versions < 1.3) require RGBA color specifications
+    # to be a single 2D array, NOT merely a list of 1D arrays. This line reshapes
+    # that if necessary.  It has no effect on 1D arrays of values.
+    colors_or_values = np.array([element for (i,element) in enumerate(colors_or_values)])
     collection = ax.scatter(x, y, c=colors_or_values,
                             vmin=vmin, vmax=vmax, cmap=cmap,
                             marker=marker, s=markersize, **kwargs)
