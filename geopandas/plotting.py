@@ -449,20 +449,26 @@ def plot_dataframe(s, column=None, cmap=None, color=None, linewidth=1.0,
         (s.geometry.type == 'Polygon') | (s.geometry.type == 'MultiPolygon'))
     polys = s.geometry[poly_idx]
     if not polys.empty:
-        # Plot the fill with default or user-specified alpha, but do not draw
-        # outlines.
-        plot_polygon_collection(ax, polys, values[poly_idx], True,
-                                vmin=mn, vmax=mx, cmap=cmap,
-                                linewidth=0, **color_kwds)
-        # Draw the edges, fully opaque, but no facecolor.
-        edges_kwds = color_kwds.copy()
-        edges_kwds['alpha'] = 1
-        edges_kwds['facecolor'] = 'none'
-        # Setting plot_values=False would cause the array values' colors to
-        # override edgecolor. By setting color instead, matplotlib will respect
-        # edgecolor if set.
-        plot_polygon_collection(ax, polys, ['black'] * len(polys), False,
-                                linewidth=linewidth, **edges_kwds)
+        if linewidth > 0 and color_kwds.get('alpha', 0.5) < 1:
+            # Plot the fill with default or user-specified alpha, but do not draw
+            # outlines.
+            plot_polygon_collection(ax, polys, values[poly_idx], True,
+                                    vmin=mn, vmax=mx, cmap=cmap,
+                                    linewidth=0, **color_kwds)
+            # Draw the edges, fully opaque, but no facecolor.
+            edges_kwds = color_kwds.copy()
+            edges_kwds['alpha'] = 1
+            edges_kwds['facecolor'] = 'none'
+            # Setting plot_values=False would cause the array values' colors to
+            # override edgecolor. By setting color instead, matplotlib will respect
+            # edgecolor if set.
+            plot_polygon_collection(ax, polys, ['black'] * len(polys), False,
+                                    linewidth=linewidth, **edges_kwds)
+        else:
+            # single call can handle painting edges and faces in this scenario
+            plot_polygon_collection(ax, polys, values[poly_idx], True,
+                                    vmin=mn, vmax=mx, cmap=cmap,
+                                    linewidth=linewidth, **color_kwds)
 
     # plot all LineStrings and MultiLineString components in same collection
     line_idx = np.array(
